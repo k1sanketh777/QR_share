@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Beam — QR File Transfer</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.js"></script>
+<style>
+  :root{
+    --bg:#0a0505;
+    --panel:#1a0a0a;
+    --line:#3d1414;
+    --signal:#ff3b3b;
+    --signal-dim:#7a1f1f;
+    --amber:#ff8a3d;
+    --text:#f5e8e8;
+    --text-dim:#a17272;
+    --mono: 'SF Mono', 'IBM Plex Mono', Menlo, Consolas, monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 15% -10%, rgba(255,59,59,0.10), transparent 40%),
+      var(--bg);
+    color:var(--text);
+    font-family:'Helvetica Neue', Arial, sans-serif;
+    min-height:100vh;
+    padding:0 0 60px;
+  }
+  .scanlines{
+    pointer-events:none;
+    position:fixed; inset:0;
+    background:repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 3px);
+    z-index:1;
+  }
+  header{
+    padding:28px 20px 18px;
+    border-bottom:1px solid var(--line);
+    position:relative;
+  }
+  .brand{
+    display:flex; align-items:baseline; gap:10px;
+    font-family:var(--mono);
+  }
+  .brand .dot{
+    width:9px;height:9px;border-radius:50%;
+    background:var(--signal);
+    box-shadow:0 0 10px var(--signal), 0 0 2px var(--signal);
+    animation:pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+  .brand h1{
+    font-size:20px; letter-spacing:3px; margin:0; font-weight:600;
+    text-transform:uppercase;
+  }
+  .brand .freq{
+    color:var(--text-dim); font-size:12px; letter-spacing:1px;
+  }
+  .tagline{
+    color:var(--text-dim); font-size:13px; margin-top:6px; max-width:640px; line-height:1.5;
+    font-family:var(--mono);
+  }
+  .wrap{
+    max-width:640px; margin:0 auto; padding:0 20px; position:relative; z-index:2;
+  }
+  .tabs{
+    display:flex; margin-top:26px; border:1px solid var(--line); border-radius:10px; overflow:hidden;
+  }
+  .tab{
+    flex:1; padding:13px; text-align:center; cursor:pointer;
+    font-family:var(--mono); font-size:12px; letter-spacing:2px; text-transform:uppercase;
+    color:var(--text-dim); background:transparent; border:none;
+    transition:background .2s, color .2s;
+  }
+  .tab.active{ background:var(--signal); color:#1a0505; font-weight:700; }
+  .panel{ display:none; margin-top:22px; }
+  .panel.active{ display:block; }
+  .card{
+    background:var(--panel); border:1px solid var(--line); border-radius:14px;
+    padding:20px; margin-bottom:16px;
+  }
+  .card h2{
+    font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--text-dim);
+    margin:0 0 14px; font-family:var(--mono); display:flex; align-items:center; gap:8px;
+  }
+  .card h2::before{ content:''; width:14px; height:1px; background:var(--signal-dim); display:inline-block;}
+
+  input[type=file]{
+    width:100%; color:var(--text-dim); font-family:var(--mono); font-size:13px;
+  }
+  input[type=file]::file-selector-button{
+    background:transparent; border:1px solid var(--signal-dim); color:var(--signal);
+    padding:9px 14px; border-radius:7px; font-family:var(--mono); font-size:12px;
+    cursor:pointer; margin-right:12px; letter-spacing:1px;
+  }
+  .row{ display:flex; gap:14px; margin-top:16px; flex-wrap:wrap; }
+  .field{ flex:1; min-width:130px; }
+  .field label{
+    display:block; font-family:var(--mono); font-size:10px; letter-spacing:1.5px;
+    color:var(--text-dim); text-transform:uppercase; margin-bottom:6px;
+  }
+  .field .val{ color:var(--signal); font-family:var(--mono); font-size:12px; float:right; }
+  input[type=range]{
+    width:100%; accent-color:var(--signal); background:transparent;
+  }
+  button.primary, button.secondary{
+    font-family:var(--mono); letter-spacing:1.5px; text-transform:uppercase; font-size:12px;
+    padding:13px 20px; border-radius:8px; cursor:pointer; border:1px solid transparent;
+    width:100%; margin-top:18px; font-weight:600;
+  }
+  button.primary{ background:var(--signal); color:#1a0505; }
+  button.primary:disabled{ background:#20362f; color:var(--text-dim); cursor:not-allowed; }
+  button.secondary{ background:transparent; border-color:var(--line); color:var(--text-dim); }
+  button.secondary:hover{ border-color:var(--signal-dim); color:var(--text); }
+
+  .qr-stage{
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    margin-top:6px; padding:22px; border:1px dashed var(--line); border-radius:14px;
+    background:#08110d;
+  }
+  #qrcode{ background:#fff; padding:14px; border-radius:8px; line-height:0; }
+  #qrcode img, #qrcode canvas{ display:block; }
+  .frame-info{
+    margin-top:16px; font-family:var(--mono); font-size:12px; color:var(--text-dim);
+    text-align:center; letter-spacing:1px;
+  }
+  .frame-info b{ color:var(--signal); }
+  .barwrap{
+    width:100%; height:6px; background:#1a2b25; border-radius:4px; overflow:hidden; margin-top:10px;
+  }
+  .barwrap .bar{
+    height:100%; background:linear-gradient(90deg, var(--signal-dim), var(--signal));
+    width:0%; transition:width .15s linear;
+  }
+
+  video{ width:100%; border-radius:12px; border:1px solid var(--line); background:#000; display:block;}
+  .scan-stage{ position:relative; }
+  .reticle{
+    position:absolute; inset:12%; border:2px solid var(--signal); border-radius:14px;
+    box-shadow:0 0 0 2000px rgba(0,0,0,0.25); opacity:.55; pointer-events:none;
+  }
+  .stats{
+    display:flex; gap:10px; margin-top:16px; flex-wrap:wrap;
+  }
+  .stat{
+    flex:1; min-width:110px; background:#08110d; border:1px solid var(--line); border-radius:10px;
+    padding:12px 14px;
+  }
+  .stat .k{ font-family:var(--mono); font-size:10px; letter-spacing:1.5px; color:var(--text-dim); text-transform:uppercase;}
+  .stat .v{ font-family:var(--mono); font-size:18px; color:var(--signal); margin-top:4px;}
+  .file-ready{
+    margin-top:16px; padding:16px; border:1px solid var(--signal-dim); border-radius:10px;
+    background:rgba(255,59,59,0.08); display:none;
+  }
+  .file-ready.show{ display:block; }
+  .file-ready .name{ font-family:var(--mono); font-size:13px; color:var(--signal); word-break:break-all;}
+  a.download-btn{
+    display:block; text-align:center; margin-top:12px; padding:13px; border-radius:8px;
+    background:var(--signal); color:#1a0505; text-decoration:none; font-family:var(--mono);
+    letter-spacing:1.5px; text-transform:uppercase; font-size:12px; font-weight:700;
+  }
+  .hint{ font-family:var(--mono); font-size:11px; color:var(--text-dim); line-height:1.6; margin-top:14px;}
+  .hint b{ color:var(--amber); }
+  .status-line{
+    font-family:var(--mono); font-size:11px; color:var(--text-dim); margin-top:10px; min-height:16px;
+  }
+  .missing{
+    font-family:var(--mono); font-size:10px; color:var(--text-dim); margin-top:8px; word-break:break-all;
+  }
+  footer{
+    text-align:center; margin-top:30px; font-family:var(--mono); font-size:10px; color:#2c4a3e;
+    letter-spacing:1px;
+  }
+</style>
+</head>
+<body>
+<div class="scanlines"></div>
+<header>
+  <div class="wrap" style="padding:0;">
+    <div class="brand"><span class="dot"></span><h1>Beam</h1><span class="freq">// optical file transfer</span></div>
+    <div class="tagline">No wifi, no bluetooth, no server. One phone flashes the file as a stream of QR codes — the other watches and rebuilds it, frame by frame.</div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="tabs">
+    <button class="tab active" data-tab="send">Send</button>
+    <button class="tab" data-tab="receive">Receive</button>
+  </div>
+
+  <!-- SEND -->
+  <div class="panel active" id="panel-send">
+    <div class="card">
+      <h2>01 · Choose file</h2>
+      <input type="file" id="fileInput">
+      <div class="row">
+        <div class="field">
+          <label>Chunk size <span class="val" id="chunkVal">300 B</span></label>
+          <input type="range" id="chunkSize" min="120" max="900" step="20" value="300">
+        </div>
+        <div class="field">
+          <label>Frame speed <span class="val" id="speedVal">280 ms</span></label>
+          <input type="range" id="frameSpeed" min="100" max="800" step="20" value="280">
+        </div>
+      </div>
+      <button class="primary" id="startBtn" disabled>Start broadcasting</button>
+      <button class="secondary" id="stopBtn" style="display:none;">Stop</button>
+    </div>
+
+    <div class="card" id="qrCard" style="display:none;">
+      <h2>02 · Point receiver's camera here</h2>
+      <div class="qr-stage">
+        <div id="qrcode"></div>
+        <div class="frame-info">Frame <b id="frameNum">0</b> / <span id="frameTotal">0</span> &nbsp;·&nbsp; loop <b id="loopNum">1</b></div>
+        <div class="barwrap"><div class="bar" id="sendBar"></div></div>
+      </div>
+      <div class="hint">Keep the phone steady and well lit. The sequence loops forever — leave it running until the receiver shows 100%. Smaller chunks + slower speed = more reliable on cheap cameras; larger chunks + faster speed = quicker transfer once it's working well.</div>
+    </div>
+  </div>
+
+  <!-- RECEIVE -->
+  <div class="panel" id="panel-receive">
+    <div class="card">
+      <h2>01 · Scan</h2>
+      <div class="scan-stage">
+        <video id="video" playsinline muted></video>
+        <div class="reticle" id="reticle" style="display:none;"></div>
+      </div>
+      <canvas id="canvas" style="display:none;"></canvas>
+      <button class="primary" id="camBtn">Start camera</button>
+      <button class="secondary" id="resetBtn" style="display:none;">Reset & scan a new file</button>
+      <div class="status-line" id="statusLine">Camera idle.</div>
+    </div>
+
+    <div class="card" id="progressCard" style="display:none;">
+      <h2>02 · Receiving</h2>
+      <div class="stats">
+        <div class="stat"><div class="k">File</div><div class="v" id="statName">—</div></div>
+        <div class="stat"><div class="k">Chunks</div><div class="v" id="statChunks">0 / 0</div></div>
+        <div class="stat"><div class="k">Progress</div><div class="v" id="statPct">0%</div></div>
+      </div>
+      <div class="barwrap" style="margin-top:14px;"><div class="bar" id="recvBar"></div></div>
+      <div class="missing" id="missingLine"></div>
+
+      <div class="file-ready" id="fileReady">
+        <div class="name" id="readyName"></div>
+        <a class="download-btn" id="downloadLink" download>Download file</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="hint" style="margin-top:6px;">
+    <b>Note:</b> camera access needs a secure context (HTTPS or localhost) — it won't work opened directly as a local file, and it won't work inside a sandboxed preview. Host this page (GitHub Pages, Netlify Drop, <span style="color:var(--text)">python3 -m http.server</span> + a tunnel, etc.) and open it on both phones.
+  </div>
+</div>
+
+<footer>BEAM · CLIENT-SIDE ONLY · NOTHING LEAVES THE DEVICE EXCEPT LIGHT</footer>
+
+<script>
+// ---------- tabs ----------
+document.querySelectorAll('.tab').forEach(t=>{
+  t.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('panel-'+t.dataset.tab).classList.add('active');
+    if(t.dataset.tab !== 'receive' && scanning) stopCamera();
+  });
+});
+
+// ---------- SEND ----------
+const fileInput = document.getElementById('fileInput');
+const chunkSizeInput = document.getElementById('chunkSize');
+const frameSpeedInput = document.getElementById('frameSpeed');
+const startBtn = document.getElementById('startBtn');
+const stopBtn = document.getElementById('stopBtn');
+const qrCard = document.getElementById('qrCard');
+const qrDiv = document.getElementById('qrcode');
+const frameNum = document.getElementById('frameNum');
+const frameTotal = document.getElementById('frameTotal');
+const loopNum = document.getElementById('loopNum');
+const sendBar = document.getElementById('sendBar');
+
+let qrObj = null;
+let frames = [];
+let timer = null;
+let curFrame = 0;
+let loopCount = 1;
+let selectedFile = null;
+
+chunkSizeInput.addEventListener('input', ()=> {
+  document.getElementById('chunkVal').textContent = chunkSizeInput.value + ' B';
+});
+frameSpeedInput.addEventListener('input', ()=> {
+  document.getElementById('speedVal').textContent = frameSpeedInput.value + ' ms';
+});
+
+fileInput.addEventListener('change', ()=>{
+  selectedFile = fileInput.files[0] || null;
+  startBtn.disabled = !selectedFile;
+});
+
+function bytesToBase64(bytes){
+  let binary = '';
+  const chunk = 0x8000;
+  for(let i=0;i<bytes.length;i+=chunk){
+    binary += String.fromCharCode.apply(null, bytes.subarray(i, i+chunk));
+  }
+  return btoa(binary);
+}
+
+function randId(){
+  return Math.random().toString(36).slice(2,8);
+}
+
+startBtn.addEventListener('click', async ()=>{
+  if(!selectedFile) return;
+  const buf = await selectedFile.arrayBuffer();
+  const bytes = new Uint8Array(buf);
+  const chunkSize = parseInt(chunkSizeInput.value,10);
+  const id = randId();
+
+  const dataFrames = [];
+  for(let i=0;i<bytes.length;i+=chunkSize){
+    const slice = bytes.subarray(i, i+chunkSize);
+    const b64 = bytesToBase64(slice);
+    dataFrames.push(`D|${id}|${dataFrames.length}|${b64}`);
+  }
+  const total = dataFrames.length;
+  const meta = `M|${id}|${total}|${encodeURIComponent(selectedFile.name)}|${encodeURIComponent(selectedFile.type||'application/octet-stream')}|${bytes.length}`;
+
+  // interleave metadata every 12 frames so late joiners pick it up fast
+  frames = [meta];
+  dataFrames.forEach((f, idx)=>{
+    frames.push(f);
+    if((idx+1) % 12 === 0) frames.push(meta);
+  });
+
+  frameTotal.textContent = total;
+  qrCard.style.display = 'block';
+  startBtn.style.display = 'none';
+  stopBtn.style.display = 'block';
+  fileInput.disabled = true;
+  chunkSizeInput.disabled = true;
+  frameSpeedInput.disabled = true;
+
+  curFrame = 0;
+  loopCount = 1;
+
+  if(qrObj){ qrDiv.innerHTML = ''; }
+  qrObj = new QRCode(qrDiv, {
+    text: frames[0],
+    width: 300,
+    height: 300,
+    colorDark: '#1a0505',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.M
+  });
+
+  const speed = parseInt(frameSpeedInput.value,10);
+  timer = setInterval(()=>{
+    curFrame++;
+    if(curFrame >= frames.length){
+      curFrame = 0;
+      loopCount++;
+      loopNum.textContent = loopCount;
+    }
+    qrDiv.innerHTML = '';
+    qrObj = new QRCode(qrDiv, {
+      text: frames[curFrame],
+      width: 300,
+      height: 300,
+      colorDark: '#1a0505',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+    const dataFrameIdx = frames.slice(0,curFrame+1).filter(f=>f.startsWith('D|')).length;
+    frameNum.textContent = Math.min(dataFrameIdx, total);
+    sendBar.style.width = (Math.min(dataFrameIdx,total)/total*100) + '%';
+  }, speed);
+});
+
+stopBtn.addEventListener('click', ()=>{
+  clearInterval(timer);
+  timer = null;
+  startBtn.style.display = 'block';
+  stopBtn.style.display = 'none';
+  fileInput.disabled = false;
+  chunkSizeInput.disabled = false;
+  frameSpeedInput.disabled = false;
+});
+
+// ---------- RECEIVE ----------
+const video = document.getElementById('video');
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d', { willReadFrequently:true });
+const camBtn = document.getElementById('camBtn');
+const resetBtn = document.getElementById('resetBtn');
+const reticle = document.getElementById('reticle');
+const statusLine = document.getElementById('statusLine');
+const progressCard = document.getElementById('progressCard');
+const statName = document.getElementById('statName');
+const statChunks = document.getElementById('statChunks');
+const statPct = document.getElementById('statPct');
+const recvBar = document.getElementById('recvBar');
+const missingLine = document.getElementById('missingLine');
+const fileReady = document.getElementById('fileReady');
+const readyName = document.getElementById('readyName');
+const downloadLink = document.getElementById('downloadLink');
+
+let stream = null;
+let scanning = false;
+let rafId = null;
+
+let curId = null;
+let meta = null; // {total, filename, mime, size}
+let chunkMap = new Map();
+let assembled = false;
+
+function base64ToBytes(b64){
+  const binary = atob(b64);
+  const bytes = new Uint8Array(binary.length);
+  for(let i=0;i<binary.length;i++) bytes[i] = binary.charCodeAt(i);
+  return bytes;
+}
+
+function resetReceiverState(){
+  curId = null; meta = null; chunkMap = new Map(); assembled = false;
+  progressCard.style.display = 'none';
+  fileReady.classList.remove('show');
+  missingLine.textContent = '';
+  resetBtn.style.display = 'none';
+}
+
+resetBtn.addEventListener('click', resetReceiverState);
+
+camBtn.addEventListener('click', async ()=>{
+  if(scanning){ stopCamera(); return; }
+  try{
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: 'environment' } }
+    });
+    video.srcObject = stream;
+    await video.play();
+    scanning = true;
+    reticle.style.display = 'block';
+    camBtn.textContent = 'Stop camera';
+    statusLine.textContent = 'Scanning…';
+    resetBtn.style.display = 'block';
+    tick();
+  }catch(err){
+    statusLine.textContent = 'Camera error: ' + (err.message || err.name) + '. Make sure this page is served over HTTPS or localhost and camera permission is allowed.';
+  }
+});
+
+function stopCamera(){
+  scanning = false;
+  if(rafId) cancelAnimationFrame(rafId);
+  if(stream) stream.getTracks().forEach(t=>t.stop());
+  reticle.style.display = 'none';
+  camBtn.textContent = 'Start camera';
+  statusLine.textContent = 'Camera stopped.';
+}
+
+function tick(){
+  if(!scanning) return;
+  if(video.readyState === video.HAVE_ENOUGH_DATA){
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const imageData = ctx.getImageData(0,0,canvas.width, canvas.height);
+    const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'dontInvert' });
+    if(code && code.data){
+      handlePacket(code.data);
+    }
+  }
+  rafId = requestAnimationFrame(tick);
+}
+
+function handlePacket(str){
+  if(assembled) return;
+  if(str.startsWith('M|')){
+    const parts = str.split('|');
+    const id = parts[1];
+    const total = parseInt(parts[2],10);
+    const filename = decodeURIComponent(parts[3]);
+    const mime = decodeURIComponent(parts[4]);
+    const size = parseInt(parts[5],10);
+    if(id !== curId){
+      curId = id;
+      chunkMap = new Map();
+    }
+    meta = { total, filename, mime, size };
+    progressCard.style.display = 'block';
+    statName.textContent = filename;
+    updateStats();
+  } else if(str.startsWith('D|')){
+    const firstSep = str.indexOf('|',2);
+    const secondSep = str.indexOf('|', firstSep+1);
+    const id = str.slice(2, firstSep);
+    const index = parseInt(str.slice(firstSep+1, secondSep),10);
+    const b64 = str.slice(secondSep+1);
+    if(curId === null){
+      // haven't seen metadata yet for this transfer; start provisional session
+      curId = id;
+    }
+    if(id !== curId) return; // ignore stray packets from a different session
+    if(!chunkMap.has(index)){
+      chunkMap.set(index, b64);
+      progressCard.style.display = 'block';
+      updateStats();
+      maybeAssemble();
+    }
+  }
+}
+
+function updateStats(){
+  const total = meta ? meta.total : '?';
+  statChunks.textContent = `${chunkMap.size} / ${total}`;
+  if(meta && meta.total){
+    const pct = Math.round(chunkMap.size / meta.total * 100);
+    statPct.textContent = pct + '%';
+    recvBar.style.width = pct + '%';
+    if(chunkMap.size < meta.total){
+      const missing = [];
+      for(let i=0;i<meta.total;i++){ if(!chunkMap.has(i)) missing.push(i); if(missing.length>20) break; }
+      missingLine.textContent = missing.length ? ('waiting on chunk(s): ' + missing.join(', ') + (chunkMap.size < meta.total-20 ? ' …' : '')) : '';
+    } else {
+      missingLine.textContent = '';
+    }
+  }
+}
+
+function maybeAssemble(){
+  if(!meta) return;
+  if(chunkMap.size !== meta.total) return;
+  assembled = true;
+  statusLine.textContent = 'All chunks received — assembling…';
+  let totalLen = 0;
+  const parts = [];
+  for(let i=0;i<meta.total;i++){
+    const bytes = base64ToBytes(chunkMap.get(i));
+    parts.push(bytes);
+    totalLen += bytes.length;
+  }
+  const out = new Uint8Array(totalLen);
+  let offset = 0;
+  for(const p of parts){ out.set(p, offset); offset += p.length; }
+  const blob = new Blob([out], { type: meta.mime || 'application/octet-stream' });
+  const url = URL.createObjectURL(blob);
+  readyName.textContent = meta.filename + '  (' + (out.length/1024).toFixed(1) + ' KB)';
+  downloadLink.href = url;
+  downloadLink.download = meta.filename;
+  fileReady.classList.add('show');
+  statusLine.textContent = 'Done. You can stop the camera now.';
+  if(navigator.vibrate){ navigator.vibrate([120, 60, 120, 60, 220]); }
+  stopCamera();
+}
+</script>
+</body>
+</html>
