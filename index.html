@@ -255,6 +255,10 @@
         <video id="video" playsinline muted></video>
         <div class="reticle" id="reticle" style="display:none;"></div>
       </div>
+      <div class="field" id="cameraSelectWrap" style="margin-top:14px; display:none;">
+        <label>Camera</label>
+        <select id="cameraSelect"></select>
+      </div>
       <canvas id="canvas" style="display:none;"></canvas>
       <button class="primary" id="camBtn">Start camera</button>
       <button class="secondary" id="resetBtn" style="display:none;">Reset & scan a new file</button>
@@ -464,6 +468,8 @@ const fileReady = document.getElementById('fileReady');
 const readyName = document.getElementById('readyName');
 const downloadLink = document.getElementById('downloadLink');
 const lanesSelectRecv = document.getElementById('lanesSelectRecv');
+const cameraSelect = document.getElementById('cameraSelect');
+const cameraSelectWrap = document.getElementById('cameraSelectWrap');
 
 function gridDimsRecv(lanes){
   switch(lanes){
@@ -501,6 +507,45 @@ function resetReceiverState(){
 
 resetBtn.addEventListener('click', resetReceiverState);
 
+async function openStream(constraints){
+  if(stream) stream.getTracks().forEach(t=>t.stop());
+  stream = await navigator.mediaDevices.getUserMedia({ video: constraints });
+  video.srcObject = stream;
+  await video.play();
+}
+
+async function populateCameraList(){
+  try{
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const cams = devices.filter(d => d.kind === 'videoinput');
+    if(cams.length <= 1) { cameraSelectWrap.style.display = 'none'; return; }
+    const currentTrack = stream.getVideoTracks()[0];
+    const currentId = currentTrack ? currentTrack.getSettings().deviceId : null;
+    cameraSelect.innerHTML = '';
+    cams.forEach((cam, i)=>{
+      const opt = document.createElement('option');
+      opt.value = cam.deviceId;
+      opt.textContent = cam.label || `Camera ${i+1}`;
+      if(cam.deviceId === currentId) opt.selected = true;
+      cameraSelect.appendChild(opt);
+    });
+    cameraSelectWrap.style.display = 'block';
+  }catch(e){
+    cameraSelectWrap.style.display = 'none';
+  }
+}
+
+cameraSelect.addEventListener('change', async ()=>{
+  try{
+    statusLine.textContent = 'Switching camera…';
+    await openStream({ deviceId: { exact: cameraSelect.value } });
+    statusLine.textContent = 'Scanning…';
+    if(scanning) tick();
+  }catch(e){
+    statusLine.textContent = 'Could not switch camera: ' + e.message;
+  }
+});
+
 camBtn.addEventListener('click', async ()=>{
   if(scanning){ stopCamera(); return; }
   if(typeof jsQR !== 'function'){
@@ -508,11 +553,8 @@ camBtn.addEventListener('click', async ()=>{
     return;
   }
   try{
-    stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: { ideal: 'environment' } }
-    });
-    video.srcObject = stream;
-    await video.play();
+    await openStream({ facingMode: { ideal: 'environment' } });
+    await populateCameraList();
     scanning = true;
     reticle.style.display = 'block';
     camBtn.textContent = 'Stop camera';
