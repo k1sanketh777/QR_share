@@ -115,13 +115,18 @@
   button.secondary{ background:transparent; border-color:var(--line); color:var(--text-dim); }
   button.secondary:hover{ border-color:var(--signal-dim); color:var(--text); }
 
+  select{
+    width:100%; background:#08110d; color:var(--text); border:1px solid var(--line);
+    border-radius:7px; padding:10px 12px; font-family:var(--mono); font-size:12px;
+  }
   .qr-stage{
     display:flex; flex-direction:column; align-items:center; justify-content:center;
     margin-top:6px; padding:22px; border:1px dashed var(--line); border-radius:14px;
     background:#08110d;
   }
-  #qrcode{ background:#fff; padding:14px; border-radius:8px; line-height:0; }
-  #qrcode img, #qrcode canvas{ display:block; }
+  #qrGrid{ display:grid; gap:10px; background:#fff; padding:14px; border-radius:8px; }
+  #qrGrid > div{ background:#fff; line-height:0; }
+  #qrGrid img, #qrGrid canvas{ display:block; }
   .frame-info{
     margin-top:16px; font-family:var(--mono); font-size:12px; color:var(--text-dim);
     text-align:center; letter-spacing:1px;
@@ -201,8 +206,20 @@
           <input type="range" id="chunkSize" min="120" max="900" step="20" value="300">
         </div>
         <div class="field">
-          <label>Frame speed <span class="val" id="speedVal">280 ms</span></label>
-          <input type="range" id="frameSpeed" min="100" max="800" step="20" value="280">
+          <label>Frame speed <span class="val" id="speedVal">220 ms</span></label>
+          <input type="range" id="frameSpeed" min="100" max="800" step="20" value="220">
+        </div>
+      </div>
+      <div class="row">
+        <div class="field">
+          <label>Lanes (parallel codes)</label>
+          <select id="lanesSelect">
+            <option value="1">1 — one code at a time</option>
+            <option value="2">2</option>
+            <option value="4" selected>4 (recommended)</option>
+            <option value="6">6</option>
+            <option value="9">9 — fast, needs a steady close-up view</option>
+          </select>
         </div>
       </div>
       <button class="primary" id="startBtn" disabled>Start broadcasting</button>
@@ -212,11 +229,11 @@
     <div class="card" id="qrCard" style="display:none;">
       <h2>02 · Point receiver's camera here</h2>
       <div class="qr-stage">
-        <div id="qrcode"></div>
+        <div id="qrGrid"></div>
         <div class="frame-info">Frame <b id="frameNum">0</b> / <span id="frameTotal">0</span> &nbsp;·&nbsp; loop <b id="loopNum">1</b></div>
         <div class="barwrap"><div class="bar" id="sendBar"></div></div>
       </div>
-      <div class="hint">Keep the phone steady and well lit. The sequence loops forever — leave it running until the receiver shows 100%. Smaller chunks + slower speed = more reliable on cheap cameras; larger chunks + faster speed = quicker transfer once it's working well.</div>
+      <div class="hint">Keep the phone steady, well lit, and fill the receiver's camera view with the whole grid. Lanes must match on both devices. The sequence loops forever — leave it running until the receiver shows 100%.</div>
     </div>
   </div>
 
@@ -224,6 +241,16 @@
   <div class="panel" id="panel-receive">
     <div class="card">
       <h2>01 · Scan</h2>
+      <div class="field" style="margin-bottom:14px;">
+        <label>Lanes (must match sender)</label>
+        <select id="lanesSelectRecv">
+          <option value="1">1 — one code at a time</option>
+          <option value="2">2</option>
+          <option value="4" selected>4 (recommended)</option>
+          <option value="6">6</option>
+          <option value="9">9</option>
+        </select>
+      </div>
       <div class="scan-stage">
         <video id="video" playsinline muted></video>
         <div class="reticle" id="reticle" style="display:none;"></div>
@@ -274,21 +301,40 @@ document.querySelectorAll('.tab').forEach(t=>{
 const fileInput = document.getElementById('fileInput');
 const chunkSizeInput = document.getElementById('chunkSize');
 const frameSpeedInput = document.getElementById('frameSpeed');
+const lanesSelect = document.getElementById('lanesSelect');
 const startBtn = document.getElementById('startBtn');
 const stopBtn = document.getElementById('stopBtn');
 const qrCard = document.getElementById('qrCard');
-const qrDiv = document.getElementById('qrcode');
+const qrGrid = document.getElementById('qrGrid');
 const frameNum = document.getElementById('frameNum');
 const frameTotal = document.getElementById('frameTotal');
 const loopNum = document.getElementById('loopNum');
 const sendBar = document.getElementById('sendBar');
 
-let qrObj = null;
+let laneObjs = [];
 let frames = [];
 let timer = null;
 let curFrame = 0;
 let loopCount = 1;
 let selectedFile = null;
+let shownCount = 0;
+
+function gridDims(lanes){
+  switch(lanes){
+    case 1: return {cols:1, rows:1};
+    case 2: return {cols:2, rows:1};
+    case 4: return {cols:2, rows:2};
+    case 6: return {cols:3, rows:2};
+    default: return {cols:3, rows:3};
+  }
+}
+function laneSize(lanes){
+  if(lanes<=1) return 280;
+  if(lanes<=2) return 220;
+  if(lanes<=4) return 170;
+  if(lanes<=6) return 140;
+  return 110;
+}
 
 chunkSizeInput.addEventListener('input', ()=> {
   document.getElementById('chunkVal').textContent = chunkSizeInput.value + ' B';
@@ -320,6 +366,7 @@ startBtn.addEventListener('click', async ()=>{
   const buf = await selectedFile.arrayBuffer();
   const bytes = new Uint8Array(buf);
   const chunkSize = parseInt(chunkSizeInput.value,10);
+  const lanes = parseInt(lanesSelect.value,10);
   const id = randId();
 
   const dataFrames = [];
@@ -331,7 +378,7 @@ startBtn.addEventListener('click', async ()=>{
   const total = dataFrames.length;
   const meta = `M|${id}|${total}|${encodeURIComponent(selectedFile.name)}|${encodeURIComponent(selectedFile.type||'application/octet-stream')}|${bytes.length}`;
 
-  // interleave metadata every 12 frames so late joiners pick it up fast
+  // interleave metadata every 12 data frames so late joiners pick it up fast
   frames = [meta];
   dataFrames.forEach((f, idx)=>{
     frames.push(f);
@@ -345,40 +392,46 @@ startBtn.addEventListener('click', async ()=>{
   fileInput.disabled = true;
   chunkSizeInput.disabled = true;
   frameSpeedInput.disabled = true;
+  lanesSelect.disabled = true;
 
   curFrame = 0;
   loopCount = 1;
+  shownCount = 0;
 
-  if(qrObj){ qrDiv.innerHTML = ''; }
-  qrObj = new QRCode(qrDiv, {
-    text: frames[0],
-    width: 300,
-    height: 300,
-    colorDark: '#1a0505',
-    colorLight: '#ffffff',
-    correctLevel: QRCode.CorrectLevel.M
-  });
+  // build the lane grid once
+  const {cols, rows} = gridDims(lanes);
+  const size = laneSize(lanes);
+  qrGrid.style.gridTemplateColumns = `repeat(${cols}, ${size}px)`;
+  qrGrid.innerHTML = '';
+  laneObjs = [];
+  for(let i=0;i<lanes;i++){
+    const cell = document.createElement('div');
+    qrGrid.appendChild(cell);
+    const obj = new QRCode(cell, {
+      text: frames[i % frames.length],
+      width: size,
+      height: size,
+      colorDark: '#1a0505',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.L
+    });
+    laneObjs.push(obj);
+  }
+  curFrame = lanes % frames.length;
 
   const speed = parseInt(frameSpeedInput.value,10);
   timer = setInterval(()=>{
-    curFrame++;
-    if(curFrame >= frames.length){
-      curFrame = 0;
-      loopCount++;
-      loopNum.textContent = loopCount;
+    for(let i=0;i<lanes;i++){
+      const f = frames[(curFrame + i) % frames.length];
+      laneObjs[i].makeCode(f); // reuses existing canvas, no DOM rebuild
+      if(f.startsWith('D|')) shownCount++;
     }
-    qrDiv.innerHTML = '';
-    qrObj = new QRCode(qrDiv, {
-      text: frames[curFrame],
-      width: 300,
-      height: 300,
-      colorDark: '#1a0505',
-      colorLight: '#ffffff',
-      correctLevel: QRCode.CorrectLevel.M
-    });
-    const dataFrameIdx = frames.slice(0,curFrame+1).filter(f=>f.startsWith('D|')).length;
-    frameNum.textContent = Math.min(dataFrameIdx, total);
-    sendBar.style.width = (Math.min(dataFrameIdx,total)/total*100) + '%';
+    curFrame = (curFrame + lanes) % frames.length;
+    if(curFrame < lanes){ loopCount++; loopNum.textContent = loopCount; }
+
+    const displayed = Math.min(shownCount, total);
+    frameNum.textContent = displayed;
+    sendBar.style.width = (displayed/total*100) + '%';
   }, speed);
 });
 
@@ -390,6 +443,7 @@ stopBtn.addEventListener('click', ()=>{
   fileInput.disabled = false;
   chunkSizeInput.disabled = false;
   frameSpeedInput.disabled = false;
+  lanesSelect.disabled = false;
 });
 
 // ---------- RECEIVE ----------
@@ -409,6 +463,17 @@ const missingLine = document.getElementById('missingLine');
 const fileReady = document.getElementById('fileReady');
 const readyName = document.getElementById('readyName');
 const downloadLink = document.getElementById('downloadLink');
+const lanesSelectRecv = document.getElementById('lanesSelectRecv');
+
+function gridDimsRecv(lanes){
+  switch(lanes){
+    case 1: return {cols:1, rows:1};
+    case 2: return {cols:2, rows:1};
+    case 4: return {cols:2, rows:2};
+    case 6: return {cols:3, rows:2};
+    default: return {cols:3, rows:3};
+  }
+}
 
 let stream = null;
 let scanning = false;
@@ -475,10 +540,20 @@ function tick(){
     canvas.height = video.videoHeight;
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     try{
-      const imageData = ctx.getImageData(0,0,canvas.width, canvas.height);
-      const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'dontInvert' });
-      if(code && code.data){
-        handlePacket(code.data);
+      const lanes = parseInt(lanesSelectRecv.value,10);
+      const {cols, rows} = gridDimsRecv(lanes);
+      const cellW = canvas.width / cols;
+      const cellH = canvas.height / rows;
+      let foundAny = false;
+      for(let r=0;r<rows;r++){
+        for(let c=0;c<cols;c++){
+          const imageData = ctx.getImageData(c*cellW, r*cellH, cellW, cellH);
+          const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'dontInvert' });
+          if(code && code.data){
+            foundAny = true;
+            handlePacket(code.data);
+          }
+        }
       }
     }catch(e){
       statusLine.textContent = 'Scan error: ' + e.message;
