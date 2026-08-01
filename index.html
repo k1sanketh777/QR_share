@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Beam — QR File Transfer</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 <style>
   :root{
     --bg:#0a0505;
@@ -438,6 +438,10 @@ resetBtn.addEventListener('click', resetReceiverState);
 
 camBtn.addEventListener('click', async ()=>{
   if(scanning){ stopCamera(); return; }
+  if(typeof jsQR !== 'function'){
+    statusLine.textContent = 'Error: the QR-scanning library (jsQR) failed to load. Check your internet connection / that the CDN script isn\'t blocked, then reload the page.';
+    return;
+  }
   try{
     stream = await navigator.mediaDevices.getUserMedia({
       video: { facingMode: { ideal: 'environment' } }
@@ -470,10 +474,14 @@ function tick(){
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    const imageData = ctx.getImageData(0,0,canvas.width, canvas.height);
-    const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'dontInvert' });
-    if(code && code.data){
-      handlePacket(code.data);
+    try{
+      const imageData = ctx.getImageData(0,0,canvas.width, canvas.height);
+      const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'dontInvert' });
+      if(code && code.data){
+        handlePacket(code.data);
+      }
+    }catch(e){
+      statusLine.textContent = 'Scan error: ' + e.message;
     }
   }
   rafId = requestAnimationFrame(tick);
