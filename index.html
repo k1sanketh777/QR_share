@@ -35,39 +35,19 @@
     background:repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px, transparent 1px, transparent 3px);
     z-index:1;
   }
-  header{
-    padding:28px 20px 18px;
-    border-bottom:1px solid var(--line);
-    position:relative;
-  }
-  .brand{
-    display:flex; align-items:baseline; gap:10px;
-    font-family:var(--mono);
-  }
+  header{ padding:28px 20px 18px; border-bottom:1px solid var(--line); position:relative; }
+  .brand{ display:flex; align-items:baseline; gap:10px; font-family:var(--mono); }
   .brand .dot{
-    width:9px;height:9px;border-radius:50%;
-    background:var(--signal);
+    width:9px;height:9px;border-radius:50%; background:var(--signal);
     box-shadow:0 0 10px var(--signal), 0 0 2px var(--signal);
     animation:pulse 1.6s ease-in-out infinite;
   }
   @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
-  .brand h1{
-    font-size:20px; letter-spacing:3px; margin:0; font-weight:600;
-    text-transform:uppercase;
-  }
-  .brand .freq{
-    color:var(--text-dim); font-size:12px; letter-spacing:1px;
-  }
-  .tagline{
-    color:var(--text-dim); font-size:13px; margin-top:6px; max-width:640px; line-height:1.5;
-    font-family:var(--mono);
-  }
-  .wrap{
-    max-width:640px; margin:0 auto; padding:0 20px; position:relative; z-index:2;
-  }
-  .tabs{
-    display:flex; margin-top:26px; border:1px solid var(--line); border-radius:10px; overflow:hidden;
-  }
+  .brand h1{ font-size:20px; letter-spacing:3px; margin:0; font-weight:600; text-transform:uppercase; }
+  .brand .freq{ color:var(--text-dim); font-size:12px; letter-spacing:1px; }
+  .tagline{ color:var(--text-dim); font-size:13px; margin-top:6px; max-width:640px; line-height:1.5; font-family:var(--mono); }
+  .wrap{ max-width:640px; margin:0 auto; padding:0 20px; position:relative; z-index:2; }
+  .tabs{ display:flex; margin-top:26px; border:1px solid var(--line); border-radius:10px; overflow:hidden; }
   .tab{
     flex:1; padding:13px; text-align:center; cursor:pointer;
     font-family:var(--mono); font-size:12px; letter-spacing:2px; text-transform:uppercase;
@@ -77,19 +57,13 @@
   .tab.active{ background:var(--signal); color:#1a0505; font-weight:700; }
   .panel{ display:none; margin-top:22px; }
   .panel.active{ display:block; }
-  .card{
-    background:var(--panel); border:1px solid var(--line); border-radius:14px;
-    padding:20px; margin-bottom:16px;
-  }
+  .card{ background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:20px; margin-bottom:16px; }
   .card h2{
     font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--text-dim);
     margin:0 0 14px; font-family:var(--mono); display:flex; align-items:center; gap:8px;
   }
   .card h2::before{ content:''; width:14px; height:1px; background:var(--signal-dim); display:inline-block;}
-
-  input[type=file]{
-    width:100%; color:var(--text-dim); font-family:var(--mono); font-size:13px;
-  }
+  input[type=file]{ width:100%; color:var(--text-dim); font-family:var(--mono); font-size:13px; }
   input[type=file]::file-selector-button{
     background:transparent; border:1px solid var(--signal-dim); color:var(--signal);
     padding:9px 14px; border-radius:7px; font-family:var(--mono); font-size:12px;
@@ -102,8 +76,10 @@
     color:var(--text-dim); text-transform:uppercase; margin-bottom:6px;
   }
   .field .val{ color:var(--signal); font-family:var(--mono); font-size:12px; float:right; }
-  input[type=range]{
-    width:100%; accent-color:var(--signal); background:transparent;
+  input[type=range]{ width:100%; accent-color:var(--signal); background:transparent; }
+  select{
+    width:100%; background:#08110d; color:var(--text); border:1px solid var(--line);
+    border-radius:7px; padding:10px 12px; font-family:var(--mono); font-size:12px;
   }
   button.primary, button.secondary{
     font-family:var(--mono); letter-spacing:1.5px; text-transform:uppercase; font-size:12px;
@@ -111,14 +87,9 @@
     width:100%; margin-top:18px; font-weight:600;
   }
   button.primary{ background:var(--signal); color:#1a0505; }
-  button.primary:disabled{ background:#20362f; color:var(--text-dim); cursor:not-allowed; }
+  button.primary:disabled{ background:#241010; color:var(--text-dim); cursor:not-allowed; }
   button.secondary{ background:transparent; border-color:var(--line); color:var(--text-dim); }
   button.secondary:hover{ border-color:var(--signal-dim); color:var(--text); }
-
-  select{
-    width:100%; background:#08110d; color:var(--text); border:1px solid var(--line);
-    border-radius:7px; padding:10px 12px; font-family:var(--mono); font-size:12px;
-  }
   .qr-stage{
     display:flex; flex-direction:column; align-items:center; justify-content:center;
     margin-top:6px; padding:22px; border:1px dashed var(--line); border-radius:14px;
@@ -127,32 +98,18 @@
   #qrGrid{ display:grid; gap:10px; background:#fff; padding:14px; border-radius:8px; }
   #qrGrid > div{ background:#fff; line-height:0; }
   #qrGrid img, #qrGrid canvas{ display:block; }
-  .frame-info{
-    margin-top:16px; font-family:var(--mono); font-size:12px; color:var(--text-dim);
-    text-align:center; letter-spacing:1px;
-  }
+  .frame-info{ margin-top:16px; font-family:var(--mono); font-size:12px; color:var(--text-dim); text-align:center; letter-spacing:1px; }
   .frame-info b{ color:var(--signal); }
-  .barwrap{
-    width:100%; height:6px; background:#1a2b25; border-radius:4px; overflow:hidden; margin-top:10px;
-  }
-  .barwrap .bar{
-    height:100%; background:linear-gradient(90deg, var(--signal-dim), var(--signal));
-    width:0%; transition:width .15s linear;
-  }
-
+  .barwrap{ width:100%; height:6px; background:#241010; border-radius:4px; overflow:hidden; margin-top:10px; }
+  .barwrap .bar{ height:100%; background:linear-gradient(90deg, var(--signal-dim), var(--signal)); width:0%; transition:width .15s linear; }
   video{ width:100%; border-radius:12px; border:1px solid var(--line); background:#000; display:block;}
   .scan-stage{ position:relative; }
   .reticle{
     position:absolute; inset:12%; border:2px solid var(--signal); border-radius:14px;
     box-shadow:0 0 0 2000px rgba(0,0,0,0.25); opacity:.55; pointer-events:none;
   }
-  .stats{
-    display:flex; gap:10px; margin-top:16px; flex-wrap:wrap;
-  }
-  .stat{
-    flex:1; min-width:110px; background:#08110d; border:1px solid var(--line); border-radius:10px;
-    padding:12px 14px;
-  }
+  .stats{ display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; }
+  .stat{ flex:1; min-width:110px; background:#08110d; border:1px solid var(--line); border-radius:10px; padding:12px 14px; }
   .stat .k{ font-family:var(--mono); font-size:10px; letter-spacing:1.5px; color:var(--text-dim); text-transform:uppercase;}
   .stat .v{ font-family:var(--mono); font-size:18px; color:var(--signal); margin-top:4px;}
   .file-ready{
@@ -168,16 +125,9 @@
   }
   .hint{ font-family:var(--mono); font-size:11px; color:var(--text-dim); line-height:1.6; margin-top:14px;}
   .hint b{ color:var(--amber); }
-  .status-line{
-    font-family:var(--mono); font-size:11px; color:var(--text-dim); margin-top:10px; min-height:16px;
-  }
-  .missing{
-    font-family:var(--mono); font-size:10px; color:var(--text-dim); margin-top:8px; word-break:break-all;
-  }
-  footer{
-    text-align:center; margin-top:30px; font-family:var(--mono); font-size:10px; color:#2c4a3e;
-    letter-spacing:1px;
-  }
+  .status-line{ font-family:var(--mono); font-size:11px; color:var(--text-dim); margin-top:10px; min-height:16px; }
+  .missing{ font-family:var(--mono); font-size:10px; color:var(--text-dim); margin-top:8px; word-break:break-all; }
+  footer{ text-align:center; margin-top:30px; font-family:var(--mono); font-size:10px; color:#3d1c1c; letter-spacing:1px; }
 </style>
 </head>
 <body>
@@ -185,7 +135,7 @@
 <header>
   <div class="wrap" style="padding:0;">
     <div class="brand"><span class="dot"></span><h1>Beam</h1><span class="freq">// optical file transfer</span></div>
-    <div class="tagline">No wifi, no bluetooth, no server. One phone flashes the file as a stream of QR codes — the other watches and rebuilds it, frame by frame.</div>
+    <div class="tagline">No wifi, no bluetooth, no server. One device flashes the file as fountain-coded QR symbols — the other watches and rebuilds it from any batch it manages to catch.</div>
   </div>
 </header>
 
@@ -202,7 +152,7 @@
       <input type="file" id="fileInput">
       <div class="row">
         <div class="field">
-          <label>Chunk size <span class="val" id="chunkVal">300 B</span></label>
+          <label>Block size <span class="val" id="chunkVal">300 B</span></label>
           <input type="range" id="chunkSize" min="120" max="900" step="20" value="300">
         </div>
         <div class="field">
@@ -218,7 +168,7 @@
             <option value="2">2</option>
             <option value="4" selected>4 (recommended)</option>
             <option value="6">6</option>
-            <option value="9">9 — fast, needs a steady close-up view</option>
+            <option value="9">9 — needs a steady close-up view</option>
           </select>
         </div>
       </div>
@@ -230,10 +180,10 @@
       <h2>02 · Point receiver's camera here</h2>
       <div class="qr-stage">
         <div id="qrGrid"></div>
-        <div class="frame-info">Frame <b id="frameNum">0</b> / <span id="frameTotal">0</span> &nbsp;·&nbsp; loop <b id="loopNum">1</b></div>
+        <div class="frame-info">Blocks <b id="blockTotal">0</b> &nbsp;·&nbsp; symbols sent <b id="symSent">0</b> &nbsp;·&nbsp; loop <b id="loopNum">1</b></div>
         <div class="barwrap"><div class="bar" id="sendBar"></div></div>
       </div>
-      <div class="hint">Keep the phone steady, well lit, and fill the receiver's camera view with the whole grid. Lanes must match on both devices. The sequence loops forever — leave it running until the receiver shows 100%.</div>
+      <div class="hint"><b>Note:</b> this bar is a rough estimate only — the sender has no way to know the receiver's real progress (that's the tradeoff for needing zero network between the two devices). Leave it running until the receiver itself shows 100%.</div>
     </div>
   </div>
 
@@ -269,7 +219,7 @@
       <h2>02 · Receiving</h2>
       <div class="stats">
         <div class="stat"><div class="k">File</div><div class="v" id="statName">—</div></div>
-        <div class="stat"><div class="k">Chunks</div><div class="v" id="statChunks">0 / 0</div></div>
+        <div class="stat"><div class="k">Blocks solved</div><div class="v" id="statChunks">0 / 0</div></div>
         <div class="stat"><div class="k">Progress</div><div class="v" id="statPct">0%</div></div>
       </div>
       <div class="barwrap" style="margin-top:14px;"><div class="bar" id="recvBar"></div></div>
@@ -283,13 +233,98 @@
   </div>
 
   <div class="hint" style="margin-top:6px;">
-    <b>Note:</b> camera access needs a secure context (HTTPS or localhost) — it won't work opened directly as a local file, and it won't work inside a sandboxed preview. Host this page (GitHub Pages, Netlify Drop, <span style="color:var(--text)">python3 -m http.server</span> + a tunnel, etc.) and open it on both phones.
+    <b>Honest expectations:</b> this is optical broadcast over a camera, not a real data link — realistic throughput is roughly 2–8 KB/sec even well-tuned. It's a solid option when there is truly no network path between two devices, for files up to a few hundred KB. It is not a substitute for WiFi/Bluetooth transfer when either is available.
+  </div>
+  <div class="hint">
+    <b>Note:</b> camera access needs a secure context (HTTPS or localhost). Host this page (GitHub Pages, Netlify Drop, <span style="color:var(--text)">python3 -m http.server</span> on localhost, etc.).
   </div>
 </div>
 
-<footer>BEAM · CLIENT-SIDE ONLY · NOTHING LEAVES THE DEVICE EXCEPT LIGHT</footer>
+<footer>BEAM · CLIENT-SIDE ONLY · FOUNTAIN-CODED · NOTHING LEAVES THE DEVICE EXCEPT LIGHT</footer>
 
 <script>
+// ============ shared fountain-code helpers (used by BOTH sender and receiver) ============
+function fnv1a(str){
+  let h = 0x811c9dc5;
+  for(let i=0;i<str.length;i++){
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
+  }
+  return h >>> 0;
+}
+function mulberry32(seed){
+  let a = seed >>> 0;
+  return function(){
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+// robust soliton CDF, cached per K
+const cdfCache = new Map();
+function solitonCDF(K){
+  if(cdfCache.has(K)) return cdfCache.get(K);
+  const c = 0.15, delta = 0.05;
+  const S = Math.max(1, c * Math.log(Math.max(K,2)/delta) * Math.sqrt(K));
+  const rho = new Float64Array(K+1);
+  rho[1] = 1/K;
+  for(let i=2;i<=K;i++) rho[i] = 1/(i*(i-1));
+  const tau = new Float64Array(K+1);
+  const SK = Math.max(1, Math.min(K, Math.round(K/S)));
+  for(let i=1;i<SK;i++) tau[i] = S/(K*i);
+  tau[SK] += S*Math.log(S/delta)/K;
+  let Z = 0;
+  const mu = new Float64Array(K+1);
+  for(let i=1;i<=K;i++){ mu[i] = rho[i]+tau[i]; Z += mu[i]; }
+  const cdf = new Float64Array(K+1);
+  let acc = 0;
+  for(let i=1;i<=K;i++){ acc += mu[i]/Z; cdf[i] = acc; }
+  cdf[K] = 1;
+  cdfCache.set(K, cdf);
+  return cdf;
+}
+function sampleDegree(rng, cdf, K){
+  const r = rng();
+  let lo=1, hi=K;
+  while(lo<hi){
+    const mid = (lo+hi)>>1;
+    if(cdf[mid] >= r) hi = mid; else lo = mid+1;
+  }
+  return lo;
+}
+// deterministic: given transferId + symbol counter + K, both sender & receiver derive the SAME index set
+function symbolIndices(id, s, K){
+  const seed = fnv1a(id + ':' + s);
+  const rng = mulberry32(seed);
+  const cdf = solitonCDF(K);
+  let degree = Math.min(sampleDegree(rng, cdf, K), K);
+  const idx = new Set();
+  while(idx.size < degree){
+    idx.add(Math.floor(rng() * K));
+  }
+  return idx;
+}
+function xorInto(dst, src){
+  for(let i=0;i<dst.length;i++) dst[i] ^= src[i];
+  return dst;
+}
+function bytesToBase64(bytes){
+  let binary = '';
+  const chunk = 0x8000;
+  for(let i=0;i<bytes.length;i+=chunk){
+    binary += String.fromCharCode.apply(null, bytes.subarray(i, i+chunk));
+  }
+  return btoa(binary);
+}
+function base64ToBytes(b64){
+  const binary = atob(b64);
+  const bytes = new Uint8Array(binary.length);
+  for(let i=0;i<binary.length;i++) bytes[i] = binary.charCodeAt(i);
+  return bytes;
+}
+function randId(){ return Math.random().toString(36).slice(2,8); }
+
 // ---------- tabs ----------
 document.querySelectorAll('.tab').forEach(t=>{
   t.addEventListener('click', ()=>{
@@ -301,7 +336,7 @@ document.querySelectorAll('.tab').forEach(t=>{
   });
 });
 
-// ---------- SEND ----------
+// ============ SEND ============
 const fileInput = document.getElementById('fileInput');
 const chunkSizeInput = document.getElementById('chunkSize');
 const frameSpeedInput = document.getElementById('frameSpeed');
@@ -310,18 +345,19 @@ const startBtn = document.getElementById('startBtn');
 const stopBtn = document.getElementById('stopBtn');
 const qrCard = document.getElementById('qrCard');
 const qrGrid = document.getElementById('qrGrid');
-const frameNum = document.getElementById('frameNum');
-const frameTotal = document.getElementById('frameTotal');
+const blockTotalEl = document.getElementById('blockTotal');
+const symSentEl = document.getElementById('symSent');
 const loopNum = document.getElementById('loopNum');
 const sendBar = document.getElementById('sendBar');
 
 let laneObjs = [];
-let frames = [];
 let timer = null;
-let curFrame = 0;
-let loopCount = 1;
 let selectedFile = null;
-let shownCount = 0;
+let sourceBlocks = [];
+let K = 0, blockSize = 0, totalBytes = 0, transferId = null;
+let symbolCounter = 0;
+let symbolsSent = 0;
+let tickCount = 0;
 
 function gridDims(lanes){
   switch(lanes){
@@ -346,50 +382,44 @@ chunkSizeInput.addEventListener('input', ()=> {
 frameSpeedInput.addEventListener('input', ()=> {
   document.getElementById('speedVal').textContent = frameSpeedInput.value + ' ms';
 });
-
 fileInput.addEventListener('change', ()=>{
   selectedFile = fileInput.files[0] || null;
   startBtn.disabled = !selectedFile;
 });
 
-function bytesToBase64(bytes){
-  let binary = '';
-  const chunk = 0x8000;
-  for(let i=0;i<bytes.length;i+=chunk){
-    binary += String.fromCharCode.apply(null, bytes.subarray(i, i+chunk));
-  }
-  return btoa(binary);
+function buildMetaPacket(){
+  return `M|${transferId}|${K}|${encodeURIComponent(selectedFile.name)}|${encodeURIComponent(selectedFile.type||'application/octet-stream')}|${totalBytes}`;
 }
-
-function randId(){
-  return Math.random().toString(36).slice(2,8);
+function buildFountainPacket(s){
+  const indices = symbolIndices(transferId, s, K);
+  const payload = new Uint8Array(blockSize);
+  for(const i of indices) xorInto(payload, sourceBlocks[i]);
+  return `F|${transferId}|${K}|${blockSize}|${totalBytes}|${s}|${bytesToBase64(payload)}`;
 }
 
 startBtn.addEventListener('click', async ()=>{
   if(!selectedFile) return;
   const buf = await selectedFile.arrayBuffer();
   const bytes = new Uint8Array(buf);
-  const chunkSize = parseInt(chunkSizeInput.value,10);
-  const lanes = parseInt(lanesSelect.value,10);
-  const id = randId();
+  blockSize = parseInt(chunkSizeInput.value,10);
+  totalBytes = bytes.length;
+  transferId = randId();
+  K = Math.max(1, Math.ceil(bytes.length / blockSize));
 
-  const dataFrames = [];
-  for(let i=0;i<bytes.length;i+=chunkSize){
-    const slice = bytes.subarray(i, i+chunkSize);
-    const b64 = bytesToBase64(slice);
-    dataFrames.push(`D|${id}|${dataFrames.length}|${b64}`);
+  sourceBlocks = [];
+  for(let i=0;i<K;i++){
+    const block = new Uint8Array(blockSize); // zero-padded
+    const slice = bytes.subarray(i*blockSize, Math.min(bytes.length, (i+1)*blockSize));
+    block.set(slice);
+    sourceBlocks.push(block);
   }
-  const total = dataFrames.length;
-  const meta = `M|${id}|${total}|${encodeURIComponent(selectedFile.name)}|${encodeURIComponent(selectedFile.type||'application/octet-stream')}|${bytes.length}`;
 
-  // interleave metadata every 12 data frames so late joiners pick it up fast
-  frames = [meta];
-  dataFrames.forEach((f, idx)=>{
-    frames.push(f);
-    if((idx+1) % 12 === 0) frames.push(meta);
-  });
+  const lanes = parseInt(lanesSelect.value,10);
+  blockTotalEl.textContent = K;
+  symbolsSent = 0;
+  symbolCounter = 0;
+  tickCount = 0;
 
-  frameTotal.textContent = total;
   qrCard.style.display = 'block';
   startBtn.style.display = 'none';
   stopBtn.style.display = 'block';
@@ -398,12 +428,7 @@ startBtn.addEventListener('click', async ()=>{
   frameSpeedInput.disabled = true;
   lanesSelect.disabled = true;
 
-  curFrame = 0;
-  loopCount = 1;
-  shownCount = 0;
-
-  // build the lane grid once
-  const {cols, rows} = gridDims(lanes);
+  const {cols} = gridDims(lanes);
   const size = laneSize(lanes);
   qrGrid.style.gridTemplateColumns = `repeat(${cols}, ${size}px)`;
   qrGrid.innerHTML = '';
@@ -412,30 +437,32 @@ startBtn.addEventListener('click', async ()=>{
     const cell = document.createElement('div');
     qrGrid.appendChild(cell);
     const obj = new QRCode(cell, {
-      text: frames[i % frames.length],
-      width: size,
-      height: size,
-      colorDark: '#1a0505',
-      colorLight: '#ffffff',
+      text: buildMetaPacket(),
+      width: size, height: size,
+      colorDark: '#1a0505', colorLight: '#ffffff',
       correctLevel: QRCode.CorrectLevel.L
     });
     laneObjs.push(obj);
   }
-  curFrame = lanes % frames.length;
 
   const speed = parseInt(frameSpeedInput.value,10);
   timer = setInterval(()=>{
-    for(let i=0;i<lanes;i++){
-      const f = frames[(curFrame + i) % frames.length];
-      laneObjs[i].makeCode(f); // reuses existing canvas, no DOM rebuild
-      if(f.startsWith('D|')) shownCount++;
+    tickCount++;
+    for(let lane=0; lane<lanes; lane++){
+      let packet;
+      // lane 0 shows metadata periodically so late joiners / new sessions pick it up fast
+      if(lane === 0 && tickCount % 15 === 0){
+        packet = buildMetaPacket();
+      } else {
+        packet = buildFountainPacket(symbolCounter++);
+        symbolsSent++;
+      }
+      laneObjs[lane].makeCode(packet);
     }
-    curFrame = (curFrame + lanes) % frames.length;
-    if(curFrame < lanes){ loopCount++; loopNum.textContent = loopCount; }
-
-    const displayed = Math.min(shownCount, total);
-    frameNum.textContent = displayed;
-    sendBar.style.width = (displayed/total*100) + '%';
+    if(tickCount % (Math.ceil(K/lanes)+1) === 0){ loopNum.textContent = (parseInt(loopNum.textContent,10)+1); }
+    symSentEl.textContent = symbolsSent;
+    const estPct = Math.min(100, Math.round(symbolsSent / (K*1.15) * 100));
+    sendBar.style.width = estPct + '%';
   }, speed);
 });
 
@@ -450,7 +477,7 @@ stopBtn.addEventListener('click', ()=>{
   lanesSelect.disabled = false;
 });
 
-// ---------- RECEIVE ----------
+// ============ RECEIVE ============
 const video = document.getElementById('video');
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d', { willReadFrequently:true });
@@ -484,28 +511,120 @@ function gridDimsRecv(lanes){
 let stream = null;
 let scanning = false;
 let rafId = null;
-
-let curId = null;
-let meta = null; // {total, filename, mime, size}
-let chunkMap = new Map();
 let assembled = false;
 
-function base64ToBytes(b64){
-  const binary = atob(b64);
-  const bytes = new Uint8Array(binary.length);
-  for(let i=0;i<binary.length;i++) bytes[i] = binary.charCodeAt(i);
-  return bytes;
+// decode state
+let st = null; // {id, K, blockSize, totalBytes, filename, mime, solved: Map, unresolved: []}
+
+function freshState(id){
+  return { id, K:0, blockSize:0, totalBytes:0, filename:null, mime:null, solved:new Map(), unresolved:[] };
 }
 
 function resetReceiverState(){
-  curId = null; meta = null; chunkMap = new Map(); assembled = false;
+  st = null; assembled = false;
   progressCard.style.display = 'none';
   fileReady.classList.remove('show');
   missingLine.textContent = '';
   resetBtn.style.display = 'none';
 }
-
 resetBtn.addEventListener('click', resetReceiverState);
+
+function ingestFountainSymbol(indices, payload){
+  const queue = [{ indices: new Set(indices), data: payload }];
+  while(queue.length){
+    const sym = queue.pop();
+    for(const i of Array.from(sym.indices)){
+      if(st.solved.has(i)){
+        xorInto(sym.data, st.solved.get(i));
+        sym.indices.delete(i);
+      }
+    }
+    if(sym.indices.size === 0) continue; // redundant / fully explained
+    if(sym.indices.size === 1){
+      const idx = sym.indices.values().next().value;
+      if(st.solved.has(idx)) continue;
+      st.solved.set(idx, sym.data);
+      const remaining = [];
+      for(const u of st.unresolved){
+        if(u.indices.has(idx)){
+          u.indices.delete(idx);
+          xorInto(u.data, sym.data);
+          if(u.indices.size <= 1){ queue.push(u); continue; }
+        }
+        remaining.push(u);
+      }
+      st.unresolved = remaining;
+    } else {
+      st.unresolved.push(sym);
+    }
+  }
+}
+
+function handlePacket(str){
+  if(assembled) return;
+  if(str.startsWith('M|')){
+    const parts = str.split('|');
+    const id = parts[1], K = parseInt(parts[2],10);
+    const filename = decodeURIComponent(parts[3]);
+    const mime = decodeURIComponent(parts[4]);
+    const totalBytes = parseInt(parts[5],10);
+    if(!st || st.id !== id){ st = freshState(id); }
+    st.K = K; st.filename = filename; st.mime = mime; st.totalBytes = totalBytes;
+    progressCard.style.display = 'block';
+    statName.textContent = filename;
+    updateStats();
+  } else if(str.startsWith('F|')){
+    const parts = str.split('|');
+    const id = parts[1];
+    const K = parseInt(parts[2],10);
+    const blockSize = parseInt(parts[3],10);
+    const totalBytes = parseInt(parts[4],10);
+    const s = parseInt(parts[5],10);
+    const payload = base64ToBytes(parts[6]);
+    if(!st || st.id !== id){ st = freshState(id); }
+    if(!st.K){ st.K = K; st.blockSize = blockSize; st.totalBytes = totalBytes; }
+    progressCard.style.display = 'block';
+    const indices = symbolIndices(id, s, st.K);
+    ingestFountainSymbol(indices, payload);
+    updateStats();
+    maybeAssemble();
+  }
+}
+
+function updateStats(){
+  if(!st) return;
+  const K = st.K || 0;
+  statChunks.textContent = `${st.solved.size} / ${K || '?'}`;
+  if(K){
+    const pct = Math.round(st.solved.size / K * 100);
+    statPct.textContent = pct + '%';
+    recvBar.style.width = pct + '%';
+    missingLine.textContent = st.solved.size < K
+      ? `${K - st.solved.size} block(s) still unresolved — keep scanning`
+      : '';
+  }
+}
+
+function maybeAssemble(){
+  if(!st || !st.K || !st.filename) return;
+  if(st.solved.size !== st.K) return;
+  assembled = true;
+  statusLine.textContent = 'All blocks recovered — assembling…';
+  const out = new Uint8Array(st.K * st.blockSize);
+  for(let i=0;i<st.K;i++){
+    out.set(st.solved.get(i), i*st.blockSize);
+  }
+  const trimmed = out.slice(0, st.totalBytes);
+  const blob = new Blob([trimmed], { type: st.mime || 'application/octet-stream' });
+  const url = URL.createObjectURL(blob);
+  readyName.textContent = st.filename + '  (' + (trimmed.length/1024).toFixed(1) + ' KB)';
+  downloadLink.href = url;
+  downloadLink.download = st.filename;
+  fileReady.classList.add('show');
+  statusLine.textContent = 'Done. You can stop the camera now.';
+  if(navigator.vibrate){ navigator.vibrate([120, 60, 120, 60, 220]); }
+  stopCamera();
+}
 
 async function openStream(constraints){
   if(stream) stream.getTracks().forEach(t=>t.stop());
@@ -518,7 +637,7 @@ async function populateCameraList(){
   try{
     const devices = await navigator.mediaDevices.enumerateDevices();
     const cams = devices.filter(d => d.kind === 'videoinput');
-    if(cams.length <= 1) { cameraSelectWrap.style.display = 'none'; return; }
+    if(cams.length <= 1){ cameraSelectWrap.style.display = 'none'; return; }
     const currentTrack = stream.getVideoTracks()[0];
     const currentId = currentTrack ? currentTrack.getSettings().deviceId : null;
     cameraSelect.innerHTML = '';
@@ -530,9 +649,7 @@ async function populateCameraList(){
       cameraSelect.appendChild(opt);
     });
     cameraSelectWrap.style.display = 'block';
-  }catch(e){
-    cameraSelectWrap.style.display = 'none';
-  }
+  }catch(e){ cameraSelectWrap.style.display = 'none'; }
 }
 
 cameraSelect.addEventListener('change', async ()=>{
@@ -549,7 +666,7 @@ cameraSelect.addEventListener('change', async ()=>{
 camBtn.addEventListener('click', async ()=>{
   if(scanning){ stopCamera(); return; }
   if(typeof jsQR !== 'function'){
-    statusLine.textContent = 'Error: the QR-scanning library (jsQR) failed to load. Check your internet connection / that the CDN script isn\'t blocked, then reload the page.';
+    statusLine.textContent = 'Error: the QR-scanning library (jsQR) failed to load. Check your internet connection, then reload the page.';
     return;
   }
   try{
@@ -586,15 +703,11 @@ function tick(){
       const {cols, rows} = gridDimsRecv(lanes);
       const cellW = canvas.width / cols;
       const cellH = canvas.height / rows;
-      let foundAny = false;
       for(let r=0;r<rows;r++){
         for(let c=0;c<cols;c++){
           const imageData = ctx.getImageData(c*cellW, r*cellH, cellW, cellH);
           const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'dontInvert' });
-          if(code && code.data){
-            foundAny = true;
-            handlePacket(code.data);
-          }
+          if(code && code.data){ handlePacket(code.data); }
         }
       }
     }catch(e){
@@ -602,86 +715,6 @@ function tick(){
     }
   }
   rafId = requestAnimationFrame(tick);
-}
-
-function handlePacket(str){
-  if(assembled) return;
-  if(str.startsWith('M|')){
-    const parts = str.split('|');
-    const id = parts[1];
-    const total = parseInt(parts[2],10);
-    const filename = decodeURIComponent(parts[3]);
-    const mime = decodeURIComponent(parts[4]);
-    const size = parseInt(parts[5],10);
-    if(id !== curId){
-      curId = id;
-      chunkMap = new Map();
-    }
-    meta = { total, filename, mime, size };
-    progressCard.style.display = 'block';
-    statName.textContent = filename;
-    updateStats();
-  } else if(str.startsWith('D|')){
-    const firstSep = str.indexOf('|',2);
-    const secondSep = str.indexOf('|', firstSep+1);
-    const id = str.slice(2, firstSep);
-    const index = parseInt(str.slice(firstSep+1, secondSep),10);
-    const b64 = str.slice(secondSep+1);
-    if(curId === null){
-      // haven't seen metadata yet for this transfer; start provisional session
-      curId = id;
-    }
-    if(id !== curId) return; // ignore stray packets from a different session
-    if(!chunkMap.has(index)){
-      chunkMap.set(index, b64);
-      progressCard.style.display = 'block';
-      updateStats();
-      maybeAssemble();
-    }
-  }
-}
-
-function updateStats(){
-  const total = meta ? meta.total : '?';
-  statChunks.textContent = `${chunkMap.size} / ${total}`;
-  if(meta && meta.total){
-    const pct = Math.round(chunkMap.size / meta.total * 100);
-    statPct.textContent = pct + '%';
-    recvBar.style.width = pct + '%';
-    if(chunkMap.size < meta.total){
-      const missing = [];
-      for(let i=0;i<meta.total;i++){ if(!chunkMap.has(i)) missing.push(i); if(missing.length>20) break; }
-      missingLine.textContent = missing.length ? ('waiting on chunk(s): ' + missing.join(', ') + (chunkMap.size < meta.total-20 ? ' …' : '')) : '';
-    } else {
-      missingLine.textContent = '';
-    }
-  }
-}
-
-function maybeAssemble(){
-  if(!meta) return;
-  if(chunkMap.size !== meta.total) return;
-  assembled = true;
-  statusLine.textContent = 'All chunks received — assembling…';
-  let totalLen = 0;
-  const parts = [];
-  for(let i=0;i<meta.total;i++){
-    const bytes = base64ToBytes(chunkMap.get(i));
-    parts.push(bytes);
-    totalLen += bytes.length;
-  }
-  const out = new Uint8Array(totalLen);
-  let offset = 0;
-  for(const p of parts){ out.set(p, offset); offset += p.length; }
-  const blob = new Blob([out], { type: meta.mime || 'application/octet-stream' });
-  const url = URL.createObjectURL(blob);
-  readyName.textContent = meta.filename + '  (' + (out.length/1024).toFixed(1) + ' KB)';
-  downloadLink.href = url;
-  downloadLink.download = meta.filename;
-  fileReady.classList.add('show');
-  statusLine.textContent = 'Done. You can stop the camera now.';
-  if(navigator.vibrate){ navigator.vibrate([120, 60, 120, 60, 220]); }
-  stopCamera();
 }
 </script>
 </body>
